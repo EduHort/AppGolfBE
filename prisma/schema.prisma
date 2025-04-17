@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Questionario {
+  id                  Int      @id @default(autoincrement())
+  nome                String   // Mapeia para Cliente.nome
+  email               String?  // Mapeia para Cliente.email (opcional no TS) -> Nullable no BD
+  telefone            String   // Mapeia para Cliente.fone
+  clube               String   // Mapeia para Inicio.clube
+  cidade              String   // Mapeia para Inicio.cidade
+  estado              String   // Mapeia para Inicio.estado
+  marca_carrinho      String   // Mapeia para Carrinho.marca
+  modelo_carrinho     String?  // Mapeia para Carrinho.modelo (opcional no TS) -> Nullable no BD
+  numero_carrinho     String?  // Mapeia para Carrinho.numero (opcional no TS) -> Nullable no BD
+  marca_bateria       String   // Mapeia para Bateria.marcaBat
+  quantidade_bateria  String   // Mapeia para Bateria.quantidade
+  tipo_bateria        String   // Mapeia para Bateria.tipo
+  tensao_bateria      String   // Mapeia para Bateria.tensao
+  caixa_bateria       String   // Mapeia para VerificarBateria.caixa
+  parafusos           String   // Mapeia para VerificarBateria.parafusos
+  terminais           String   // Mapeia para VerificarBateria.terminais
+  polos               String   // Mapeia para VerificarBateria.polos
+  nivel_bateria       String   // Mapeia para VerificarBateria.nivel
+  tensoes             String   // Mapeia para VerificarTensao.tensao
+  funcionario         String   // Mapeia para Inicio.usuario
+  comentario          String?  // Mapeia para Comentario.comentario (opcional no TS) -> Nullable no BD
+  data                DateTime @default(now())
+
+  @@map("questionarios")
+}
