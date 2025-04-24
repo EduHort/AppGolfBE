@@ -20,8 +20,6 @@ routes.post('/survey', async (req: Request, res: Response) => {
         if (!surveyData || !surveyData.inicio || !surveyData.cliente || !surveyData.carrinho || !surveyData.bateria || !surveyData.verificarBateria || !surveyData.verificarTensao || !surveyData.comentario) {
             return res.status(400).json({ message: 'Dados incompletos ou em formato inválido.' });
         }
-        // Você poderia adicionar validações mais específicas aqui (ex: verificar tipos, campos obrigatórios dentro dos objetos)
-
         // 3. Mapeia os dados recebidos para o formato do modelo Prisma `Questionario`
         const dataToSave = {
             // Dados do Cliente
@@ -60,7 +58,7 @@ routes.post('/survey', async (req: Request, res: Response) => {
             data: dataToSave,
         });
 
-        let responseMsg = `Questionário salvo com sucesso`;
+        let responseMsg = `Questionário salvo com sucesso.`;
         let pdfResult: { pdfPath: string, safeName: string } | null = null;
 
         try {
@@ -68,7 +66,7 @@ routes.post('/survey', async (req: Request, res: Response) => {
             console.log(`[${novoQuestionario.id}] PDF gerado com sucesso: ${pdfResult.pdfPath}`);
         } catch (pdfError) {
             console.error(`[${novoQuestionario.id}] ERRO AO GERAR PDF:`, pdfError);
-            responseMsg += `\nMas não foi possivel gerar o PDF`;
+            responseMsg += `\nMas não foi possivel gerar o PDF.`;
         }
 
         if(pdfResult) {
