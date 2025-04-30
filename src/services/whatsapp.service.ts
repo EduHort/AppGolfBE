@@ -33,10 +33,32 @@ client.on('qr', qr => {
     qrcode.generate(qr, {small: true});
 });
 
+const WHATSAPP_WAIT_TIMEOUT_MS = 15000; // Tempo máximo de espera (15 segundos)
+const WHATSAPP_CHECK_INTERVAL_MS = 2000; // Intervalo entre verificações (2 segundo)
+
 export async function sendWhatsAppMessage(phone: string, clientName: string, filePath: string) {
     if (!isWhatsAppReady) {
-        console.warn('WhatsApp ainda não está pronto. Aguardando...');
-        return;
+        console.warn(`[${clientName}] WhatsApp não está pronto. Aguardando até ${WHATSAPP_WAIT_TIMEOUT_MS / 1000} segundos...`);
+        const startTime = Date.now();
+
+        // Loop enquanto não estiver pronto E o tempo limite não foi atingido
+        while (!isWhatsAppReady && (Date.now() - startTime < WHATSAPP_WAIT_TIMEOUT_MS)) {
+            // Espera pelo intervalo definido
+            await delay(WHATSAPP_CHECK_INTERVAL_MS);
+            // Não precisa verificar 'isWhatsAppReady' aqui de novo, o 'while' já faz isso na próxima iteração
+            console.log(`[${clientName}] Ainda aguardando WhatsApp... (${Math.round((Date.now() - startTime) / 1000)}s)`);
+        }
+
+        // Após o loop, verifica uma última vez se ficou pronto
+        if (!isWhatsAppReady) {
+            // Se ainda não estiver pronto após o tempo limite, lança o erro
+            const errorMsg = `Cliente WhatsApp não ficou pronto após ${WHATSAPP_WAIT_TIMEOUT_MS / 1000} segundos. Mensagem não enviada.`;
+            console.error(`[${clientName}] ${errorMsg}`);
+            throw new Error(errorMsg);
+        } else {
+            // Se ficou pronto durante a espera
+             console.log(`[${clientName}] WhatsApp ficou pronto durante a espera! Prosseguindo com o envio.`);
+        }
     }
 
     const formattedNumber = formatPhoneNumberWapp(phone);
@@ -55,6 +77,8 @@ export async function sendWhatsAppMessage(phone: string, clientName: string, fil
         throw error;
     }
 }
+
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 function formatPhoneNumberWapp(phone: string) {
     let rawPhone = phone.replace(/\D/g, ""); // Remove caracteres não numéricos
