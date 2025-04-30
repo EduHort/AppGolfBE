@@ -91,7 +91,7 @@ async function generateChartImage(voltages: string[]): Promise<Buffer> {
     }
 }
 
-export async function generatePDF(surveyData: SurveyData, questionarioId: number): Promise<{ pdfPath: string; safeName: string }> {
+export async function generatePDF(surveyData: SurveyData): Promise<{ pdfPath: string; safeName: string }> {
     try {
         const hasComments = surveyData.comentario?.comentario && surveyData.comentario.comentario.trim() !== '';
         const templateFileName = hasComments ? 'RelatorioC.pdf' : 'Relatorio.pdf';
@@ -102,7 +102,7 @@ export async function generatePDF(surveyData: SurveyData, questionarioId: number
             strict: true,
             replacement: "_", 
         });
-        const outputFileName = `Relatorio_${safeClientName}_${questionarioId}.pdf`;
+        const outputFileName = `Relatorio_${safeClientName}.pdf`;
         const outputDir = path.resolve(__dirname, '..', '..', 'generated_pdfs');
         const outputPath = path.join(outputDir, outputFileName);
         

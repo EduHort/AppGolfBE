@@ -47,3 +47,4 @@ coverage/
 # Optional Files
 .npmrc
 generated_pdfs/
+firebase*

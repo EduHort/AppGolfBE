@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import dotenv from 'dotenv';
 import { routes } from './routes';
@@ -30,3 +31,4 @@ const startServer = async () => {
 
 // Chama a função para iniciar o servidor
 startServer();
+*/

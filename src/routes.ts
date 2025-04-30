@@ -1,3 +1,4 @@
+/*
 // src/routes.ts
 import { Router, Request, Response } from 'express';
 import { prisma } from './lib/prisma';
@@ -105,3 +106,4 @@ routes.post('/survey', async (req: Request, res: Response) => {
         }
     }
 });
+*/
