@@ -71,7 +71,6 @@ export async function sendWhatsAppMessage(phone: string, clientName: string, fil
     const message = `Olá ${clientName}, segue o seu relatório do Pit Stop Golf.`;
     try {
         await client.sendMessage(formattedNumber, media, { caption: message });
-        console.log(`Mensagem enviada para ${clientName} (${formattedNumber})`);
     } catch (error) {
         console.error(`Erro ao enviar mensagem para ${clientName} (${formattedNumber}):`, error);
         throw error;
