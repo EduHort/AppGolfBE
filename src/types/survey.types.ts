@@ -55,8 +55,8 @@ export interface SurveyData {
 export interface FirestoreData {
     surveyData: SurveyData;
     status: 'pendente' | 'processando' | 'sucesso' | 'erro';
-    Email?: 'nao_aplicavel' | 'sucesso' | 'erro';
-    whatsapp?: 'nao_enviado' | 'sucesso' | 'erro';
+    emailStatus?: 'nao_aplicavel' | 'sucesso' | 'erro';
+    whatsStatus?: 'nao_enviado' | 'sucesso' | 'erro';
     enviadoEm: Timestamp | FieldValue;
     processadoInicioEm?: Timestamp;
     processadoFimEm?: Timestamp;
