@@ -63,7 +63,7 @@ async function generateChartImage(
                 legend: {
                     display: true,
                     labels: {
-                        font: { size: 18 },
+                        font: { size: 22, weight: 'bold' },
                         color: 'black'
                     }
                 },
@@ -96,7 +96,7 @@ async function generateChartImage(
             afterDatasetsDraw: (chart: any) => {
                 const ctx = chart.ctx;
                 ctx.save();
-                ctx.font = 'bold 16px Arial';
+                ctx.font = 'bold 24px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
 
