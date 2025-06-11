@@ -1,7 +1,7 @@
 import { FieldValue, Timestamp } from "firebase/firestore";
 
-export interface Inicio {
-    usuario: string;
+export interface Usuario {
+    nome: string;
     cidade: string;
     estado: string;
     clube: string;
@@ -11,22 +11,30 @@ export interface Cliente {
     nome: string;
     fone: string;
     email?: string | null;
+    clube: string;
+    cidade: string;
+    estado: string;
+    id?: string;
+    enviadoEm?: Timestamp | FieldValue;
+    atualizadoEm?: Timestamp;
 }
 
 export interface Carrinho {
     marca: string;
     modelo?: string | null;
     numero?: string | null;
-}
-
-export interface Bateria {
+    cor?: string | null;
     marcaBat: string;
     tipo: string;
     tensao: string;
     quantidade: string;
+    dono: string;
+    id?: string;
+    enviadoEm?: Timestamp | FieldValue;
+    atualizadoEm?: Timestamp;
 }
 
-export interface VerificarBateria {
+interface VerificarBateria {
     caixa: string;
     parafusos: string;
     terminais: string;
@@ -34,22 +42,17 @@ export interface VerificarBateria {
     nivel: string;
 }
 
-export interface VerificarTensao {
+export interface TabsData {
     tensao: string[];
-}
-
-export interface Comentario {
     comentario?: string | null;
+    densidade?: string[] | null;
+    verificarBateria: VerificarBateria;
 }
 
-export interface SurveyData {
-    inicio: Inicio;
-    cliente: Cliente;
+export interface SurveyData extends TabsData {
+    usuario: Usuario;
     carrinho: Carrinho;
-    bateria: Bateria;
-    verificarBateria: VerificarBateria;
-    verificarTensao: VerificarTensao;
-    comentario: Comentario;
+    cliente: Cliente;
 }
 
 export interface FirestoreData {
@@ -62,6 +65,8 @@ export interface FirestoreData {
     processadoFimEm?: Timestamp;
     pdfGerado?: boolean;
     mensagemErro?: string;
+    atualizadoEm?: Timestamp;
+    id?: string;
 }
 
 export interface OfflineSurveyItem {
@@ -69,6 +74,6 @@ export interface OfflineSurveyItem {
     savedAt: string;
     name: string;
     payload: SurveyData;
-    status: 'pending' | 'syncing' | 'failed';
+    status: 'pendente' | 'processando' | 'erro';
     originalKey?: string;
 }

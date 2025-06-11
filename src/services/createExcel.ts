@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import { FirestoreData } from '../types/survey.types';
+import { FirestoreData } from '../types/types';
 import path from 'path';
 import ExcelJS from 'exceljs';
 
@@ -17,7 +17,7 @@ const excelName = 'questionarios.xlsx';
 const excelPath = path.join(__dirname, '..', '..', excelName);
 
 const generateExcel = async () => {
-    try{
+    try {
         const snapshot = await querySucesso.get();
 
         if (snapshot.empty) {
@@ -39,9 +39,13 @@ const generateExcel = async () => {
             { header: 'Nome Cliente', key: 'clienteNome', width: 30 },
             { header: 'Telefone Cliente', key: 'clienteFone', width: 20 },
             { header: 'Email Cliente', key: 'clienteEmail', width: 30 },
+            { header: 'Clube Cliente', key: 'clienteClube', width: 30 },
+            { header: 'Cidade Cliente', key: 'clienteCidade', width: 30 },
+            { header: 'Estado Cliente', key: 'clienteEstado', width: 30 },
             { header: 'Marca Carrinho', key: 'carrinhoMarca', width: 15 },
             { header: 'Modelo Carrinho', key: 'carrinhoModelo', width: 15 },
             { header: 'Num Carrinho', key: 'carrinhoNumero', width: 15 },
+            { header: 'Cor Carrinho', key: 'carrinhoCor', width: 15 },
             { header: 'Marca Bateria', key: 'batMarca', width: 20 },
             { header: 'Tipo Bateria', key: 'batTipo', width: 15 },
             { header: 'Tensão Bateria', key: 'batTensao', width: 15 },
@@ -52,6 +56,7 @@ const generateExcel = async () => {
             { header: 'Verif: Polos', key: 'verifPolos', width: 15 },
             { header: 'Verif: Nível', key: 'verifNivel', width: 15 },
             { header: 'Verif: Tensões', key: 'verifTensoes', width: 30 },
+            { header: 'Verif: Densidade', key: 'verifDensidade', width: 30 },
             { header: 'Comentário', key: 'comentario', width: 40 },
             // --- Metadados do Processamento ---
             { header: 'PDF Gerado', key: 'pdfGerado', width: 12 },
@@ -82,27 +87,32 @@ const generateExcel = async () => {
                 enviadoEm: formatTimestamp(data.enviadoEm),
                 // --- Dados da Pesquisa ---
                 // Lembre-se de usar 'data.surveyData.' por causa da sua estrutura
-                funcionario: data.surveyData?.inicio?.usuario ?? '',
-                clube: data.surveyData?.inicio?.clube ?? '',
-                cidade: data.surveyData?.inicio?.cidade ?? '',
-                estado: data.surveyData?.inicio?.estado ?? '',
+                funcionario: data.surveyData?.usuario.nome ?? '',
+                clube: data.surveyData?.usuario.clube ?? '',
+                cidade: data.surveyData?.usuario.cidade ?? '',
+                estado: data.surveyData?.usuario.estado ?? '',
                 clienteNome: data.surveyData?.cliente?.nome ?? '',
                 clienteFone: data.surveyData?.cliente?.fone ?? '',
-                clienteEmail: data.surveyData?.cliente?.email ?? '', // Já pode ser null
+                clienteEmail: data.surveyData?.cliente?.email ?? '',
+                clienteClube: data.surveyData?.cliente?.clube ?? '',
+                clienteCidade: data.surveyData?.cliente?.cidade ?? '',
+                clienteEstado: data.surveyData?.cliente?.estado ?? '',
                 carrinhoMarca: data.surveyData?.carrinho?.marca ?? '',
-                carrinhoModelo: data.surveyData?.carrinho?.modelo ?? '', // Já pode ser null
-                carrinhoNumero: data.surveyData?.carrinho?.numero ?? '', // Já pode ser null
-                batMarca: data.surveyData?.bateria?.marcaBat ?? '',
-                batTipo: data.surveyData?.bateria?.tipo ?? '',
-                batTensao: data.surveyData?.bateria?.tensao ?? '',
-                batQtd: data.surveyData?.bateria?.quantidade ?? '',
+                carrinhoModelo: data.surveyData?.carrinho?.modelo ?? '',
+                carrinhoNumero: data.surveyData?.carrinho?.numero ?? '',
+                carrinhoCor: data.surveyData?.carrinho?.cor ?? '',
+                batMarca: data.surveyData?.carrinho?.marcaBat ?? '',
+                batTipo: data.surveyData?.carrinho?.tipo ?? '',
+                batTensao: data.surveyData?.carrinho?.tensao ?? '',
+                batQtd: data.surveyData?.carrinho?.quantidade ?? '',
                 verifCaixa: data.surveyData?.verificarBateria?.caixa ?? '',
                 verifParafusos: data.surveyData?.verificarBateria?.parafusos ?? '',
                 verifTerminais: data.surveyData?.verificarBateria?.terminais ?? '',
                 verifPolos: data.surveyData?.verificarBateria?.polos ?? '',
                 verifNivel: data.surveyData?.verificarBateria?.nivel ?? '',
-                verifTensoes: data.surveyData?.verificarTensao?.tensao?.join(', ') ?? '', // Junta o array
-                comentario: data.surveyData?.comentario?.comentario ?? '', // Acessa o campo dentro do objeto
+                verifTensoes: data.surveyData?.tensao?.join(', ') ?? '', // Junta o array
+                verifDensidade: data.surveyData?.densidade?.join(', ') ?? '', // Junta o array
+                comentario: data.surveyData?.comentario ?? '',
                 // --- Metadados ---
                 pdfGerado: data.pdfGerado === true ? 'Sim' : (data.pdfGerado === false ? 'Não' : ''),
                 emailStatus: data.emailStatus ?? '', // Usa o nome correto do status

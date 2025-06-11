@@ -48,4 +48,4 @@ coverage/
 .npmrc
 generated_pdfs/
 firebase*
-.*xlsx
+*.xlsx

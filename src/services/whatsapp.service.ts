@@ -30,7 +30,7 @@ client.once('ready', () => {
 });
 
 client.on('qr', qr => {
-    qrcode.generate(qr, {small: true});
+    qrcode.generate(qr, { small: true });
 });
 
 const WHATSAPP_WAIT_TIMEOUT_MS = 15000; // Tempo máximo de espera (15 segundos)
@@ -57,14 +57,14 @@ export async function sendWhatsAppMessage(phone: string, clientName: string, fil
             throw new Error(errorMsg);
         } else {
             // Se ficou pronto durante a espera
-             console.log(`[${clientName}] WhatsApp ficou pronto durante a espera! Prosseguindo com o envio.`);
+            console.log(`[${clientName}] WhatsApp ficou pronto durante a espera! Prosseguindo com o envio.`);
         }
     }
 
     const formattedNumber = formatPhoneNumberWapp(phone);
     if (!formattedNumber) {
-         console.warn(`Número de telefone inválido para WhatsApp: ${phone}. Mensagem para ${clientName} não enviada.`);
-         throw new Error("Número de telefone inválido para WhatsApp.");
+        console.warn(`Número de telefone inválido para WhatsApp: ${phone}. Mensagem para ${clientName} não enviada.`);
+        throw new Error("Número de telefone inválido para WhatsApp.");
     }
 
     const media = MessageMedia.fromFilePath(filePath);
@@ -82,10 +82,10 @@ const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(r
 function formatPhoneNumberWapp(phone: string) {
     let rawPhone = phone.replace(/\D/g, ""); // Remove caracteres não numéricos
     if (!rawPhone.startsWith("55")) {
-      rawPhone = "55" + rawPhone;
+        rawPhone = "55" + rawPhone;
     }
     if (rawPhone.length === 13 && rawPhone[4] === "9") {
-      rawPhone = rawPhone.slice(0, 4) + rawPhone.slice(5);
+        rawPhone = rawPhone.slice(0, 4) + rawPhone.slice(5);
     }
     return `${rawPhone}@c.us`;
 };
