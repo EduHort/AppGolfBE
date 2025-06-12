@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 
 export async function sendEmail(to: string, name: string, safeName: string, path: string) {
   const mailOptions = {
-    from: "App PitStop" + process.env.GOOGLE_EMAIL,
+    from: `"Elo Energy Storage" <${process.env.GOOGLE_EMAIL}>`,
     to,
     subject: "Relatório Pit Stop Golf",
     text: `Olá ${name}, segue o seu relatório do Pit Stop Golf.`,
