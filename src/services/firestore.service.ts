@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import { Cliente, Carrinho } from '../types/types'; // Ajuste o caminho se necessário
+import { Cliente, Carrinho } from '../types/types';
 
 /**
  * Procura um cliente na coleção 'clientes' pelo número de telefone.
@@ -60,7 +60,6 @@ export const addCart = async (db: admin.firestore.Firestore, cartData: Carrinho,
         const docRef = await db.collection('carrinhos').add({
             ...dataToSave,
             dono: ownerId, // Associa o carrinho ao cliente
-            enviadoEm: admin.firestore.FieldValue.serverTimestamp(),
         });
         return docRef.id;
     } catch (error) {

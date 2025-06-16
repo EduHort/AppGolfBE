@@ -11,115 +11,195 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const questionarioCollectionRef = db.collection('questionario');
-const querySucesso = questionarioCollectionRef.where('status', '==', 'sucesso');
-const excelName = 'questionarios.xlsx';
+const questionariosCollectionRef = db.collection('questionarios');
+// --- NOME DO ARQUIVO EXCEL ---
+const now = new Date();
+const formattedDate = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+const excelName = `questionarios-${formattedDate}.xlsx`;
+
 const excelPath = path.join(__dirname, '..', '..', excelName);
 
 const generateExcel = async () => {
     try {
-        const snapshot = await querySucesso.get();
+        const snapshot = await questionariosCollectionRef.get();
 
         if (snapshot.empty) {
             console.log("Nenhum documento encontrado para o relatório.");
             throw new Error("Nenhum dado encontrado para gerar o relatório.");
         }
 
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Questionários');
-
-        worksheet.columns = [
-            { header: 'Status Processamento', key: 'status', width: 15 },
-            { header: 'Data Envio', key: 'enviadoEm', width: 20 },
-            // --- Dados da Pesquisa (do objeto surveyData) ---
-            { header: 'Funcionário', key: 'funcionario', width: 20 },
-            { header: 'Clube', key: 'clube', width: 25 },
-            { header: 'Cidade', key: 'cidade', width: 20 },
-            { header: 'Estado', key: 'estado', width: 10 },
-            { header: 'Nome Cliente', key: 'clienteNome', width: 30 },
-            { header: 'Telefone Cliente', key: 'clienteFone', width: 20 },
-            { header: 'Email Cliente', key: 'clienteEmail', width: 30 },
-            { header: 'Clube Cliente', key: 'clienteClube', width: 30 },
-            { header: 'Cidade Cliente', key: 'clienteCidade', width: 30 },
-            { header: 'Estado Cliente', key: 'clienteEstado', width: 30 },
-            { header: 'Marca Carrinho', key: 'carrinhoMarca', width: 15 },
-            { header: 'Modelo Carrinho', key: 'carrinhoModelo', width: 15 },
-            { header: 'Num Carrinho', key: 'carrinhoNumero', width: 15 },
-            { header: 'Cor Carrinho', key: 'carrinhoCor', width: 15 },
-            { header: 'Marca Bateria', key: 'batMarca', width: 20 },
-            { header: 'Tipo Bateria', key: 'batTipo', width: 15 },
-            { header: 'Tensão Bateria', key: 'batTensao', width: 15 },
-            { header: 'Qtd Bateria', key: 'batQtd', width: 10 },
-            { header: 'Verif: Caixa', key: 'verifCaixa', width: 15 },
-            { header: 'Verif: Parafusos', key: 'verifParafusos', width: 15 },
-            { header: 'Verif: Terminais', key: 'verifTerminais', width: 15 },
-            { header: 'Verif: Polos', key: 'verifPolos', width: 15 },
-            { header: 'Verif: Nível', key: 'verifNivel', width: 15 },
-            { header: 'Verif: Tensões', key: 'verifTensoes', width: 30 },
-            { header: 'Verif: Densidade', key: 'verifDensidade', width: 30 },
-            { header: 'Comentário', key: 'comentario', width: 40 },
-            // --- Metadados do Processamento ---
-            { header: 'PDF Gerado', key: 'pdfGerado', width: 12 },
-            { header: 'Status Email', key: 'emailStatus', width: 15 },
-            { header: 'Status WhatsApp', key: 'whatsStatus', width: 15 },
-            { header: 'Data Processamento Fim', key: 'processadoFimEm', width: 20 },
-            { header: 'Mensagem Erro', key: 'mensagemErro', width: 40 },
-        ];
-
-        // Formata o cabeçalho
-        worksheet.getRow(1).font = { bold: true };
-        worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-        snapshot.docs.forEach((doc) => {
-            const data = doc.data() as FirestoreData; // Usa seu tipo
-
-            // Função auxiliar para formatar Timestamp ou retornar vazio
-            const formatTimestamp = (ts: any): string => {
-                if (ts && typeof ts.toDate === 'function') {
-                    // Formato mais legível ou use toISOString() se preferir
-                    return ts.toDate().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-                }
-                return '';
+        // Agrupar os dados
+        const groupedData: {
+            [clienteId: string]: {
+                cliente: any;
+                carrinhos: {
+                    [carrinhoId: string]: {
+                        carrinho: any;
+                        surveys: FirebaseFirestore.DocumentData[];
+                    };
+                };
             };
+        } = {};
 
-            worksheet.addRow({
-                status: data.status ?? '',
-                enviadoEm: formatTimestamp(data.enviadoEm),
-                // --- Dados da Pesquisa ---
-                // Lembre-se de usar 'data.surveyData.' por causa da sua estrutura
-                funcionario: data.surveyData?.usuario.nome ?? '',
-                clube: data.surveyData?.usuario.clube ?? '',
-                cidade: data.surveyData?.usuario.cidade ?? '',
-                estado: data.surveyData?.usuario.estado ?? '',
-                clienteNome: data.surveyData?.cliente?.nome ?? '',
-                clienteFone: data.surveyData?.cliente?.fone ?? '',
-                clienteEmail: data.surveyData?.cliente?.email ?? '',
-                clienteClube: data.surveyData?.cliente?.clube ?? '',
-                clienteCidade: data.surveyData?.cliente?.cidade ?? '',
-                clienteEstado: data.surveyData?.cliente?.estado ?? '',
-                carrinhoMarca: data.surveyData?.carrinho?.marca ?? '',
-                carrinhoModelo: data.surveyData?.carrinho?.modelo ?? '',
-                carrinhoNumero: data.surveyData?.carrinho?.numero ?? '',
-                carrinhoCor: data.surveyData?.carrinho?.cor ?? '',
-                batMarca: data.surveyData?.carrinho?.marcaBat ?? '',
-                batTipo: data.surveyData?.carrinho?.tipo ?? '',
-                batTensao: data.surveyData?.carrinho?.tensao ?? '',
-                batQtd: data.surveyData?.carrinho?.quantidade ?? '',
-                verifCaixa: data.surveyData?.verificarBateria?.caixa ?? '',
-                verifParafusos: data.surveyData?.verificarBateria?.parafusos ?? '',
-                verifTerminais: data.surveyData?.verificarBateria?.terminais ?? '',
-                verifPolos: data.surveyData?.verificarBateria?.polos ?? '',
-                verifNivel: data.surveyData?.verificarBateria?.nivel ?? '',
-                verifTensoes: data.surveyData?.tensao?.join(', ') ?? '', // Junta o array
-                verifDensidade: data.surveyData?.densidade?.join(', ') ?? '', // Junta o array
-                comentario: data.surveyData?.comentario ?? '',
-                // --- Metadados ---
-                pdfGerado: data.pdfGerado === true ? 'Sim' : (data.pdfGerado === false ? 'Não' : ''),
-                emailStatus: data.emailStatus ?? '', // Usa o nome correto do status
-                whatsStatus: data.whatsStatus ?? '', // Usa o nome correto do status
-                processadoFimEm: formatTimestamp(data.processadoFimEm),
-                mensagemErro: data.mensagemErro ?? '',
+        snapshot.docs.forEach(doc => {
+            const data = doc.data() as FirestoreData;
+            const clienteId = data.surveyData?.cliente.id ?? doc.id; // Usar o ID do documento se não houver cliente.id
+            const carrinhoId = data.surveyData?.carrinho.id ?? doc.id; // Usar o ID do documento se não houver carrinho.id
+
+            if (!groupedData[clienteId]) {
+                groupedData[clienteId] = {
+                    cliente: data.surveyData?.cliente,
+                    carrinhos: {}
+                };
+            }
+
+            if (!groupedData[clienteId].carrinhos[carrinhoId]) {
+                groupedData[clienteId].carrinhos[carrinhoId] = {
+                    carrinho: data.surveyData?.carrinho,
+                    surveys: []
+                };
+            }
+
+            groupedData[clienteId].carrinhos[carrinhoId].surveys.push(data);
+        });
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Relatório Hierárquico');
+
+        const formatTimestamp = (ts: any): string => {
+            if (ts && typeof ts.toDate === 'function') {
+                return ts.toDate().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            }
+            return '';
+        };
+
+        let rowIndex = 1;
+
+        Object.entries(groupedData).forEach(([clienteId, clienteData]) => {
+            const cliente = clienteData.cliente;
+
+            // Título do Cliente
+            worksheet.mergeCells(`A${rowIndex}:J${rowIndex}`);
+            const clienteCell = worksheet.getCell(`A${rowIndex}`);
+            clienteCell.value = `Cliente: ${cliente?.nome ?? 'Desconhecido'}`;
+            clienteCell.font = { bold: true, size: 14 };
+            clienteCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFBDE5F8' },
+            };
+            rowIndex++;
+
+            // Dados do Cliente (com leve indentação)
+            const clienteInfo = [
+                `Telefone: ${cliente?.fone ?? ''}`,
+                `Email: ${cliente?.email ?? ''}`,
+                `Cidade: ${cliente?.cidade ?? ''}`,
+                `Estado: ${cliente?.estado ?? ''}`,
+                `Clube: ${cliente?.clube ?? ''}`
+            ];
+            clienteInfo.forEach(info => {
+                const cell = worksheet.getCell(`A${rowIndex}`);
+                cell.value = `   ${info}`;
+                cell.font = { italic: true, color: { argb: 'FF444444' } };
+                rowIndex++;
             });
+
+            rowIndex++; // espaço
+
+            Object.entries(clienteData.carrinhos).forEach(([carrinhoId, carrinhoData]) => {
+                const carrinho = carrinhoData.carrinho;
+
+                // Título do Carrinho
+                worksheet.mergeCells(`A${rowIndex}:J${rowIndex}`);
+                const carrinhoCell = worksheet.getCell(`A${rowIndex}`);
+                carrinhoCell.value = `Carrinho: ${carrinho?.marca ?? ''} - ${carrinho?.modelo ?? ''} - Nº ${carrinho?.numero ?? ''} - Cor ${carrinho?.cor ?? ''}`;
+                carrinhoCell.font = { italic: true, size: 12 };
+                carrinhoCell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFEFEFEF' },
+                };
+                rowIndex++;
+
+                // Dados do Carrinho
+                const carrinhoInfo = [
+                    `Marca Bateria: ${carrinho?.marcaBat ?? ''}`,
+                    `Tipo: ${carrinho?.tipo ?? ''}`,
+                    `Tensão: ${carrinho?.tensao ?? ''}`,
+                    `Quantidade: ${carrinho?.quantidade ?? ''}`
+                ];
+                carrinhoInfo.forEach(info => {
+                    worksheet.getCell(`A${rowIndex}`).value = `   ${info}`;
+                    rowIndex++;
+                });
+
+                rowIndex++; // espaço
+
+                // Cabeçalho da survey
+                const headers = [
+                    'Data Envio', 'Funcionário', 'Clube', 'Tensões', 'Densidades',
+                    'Comentário', 'PDF', 'Status Email', 'Status WhatsApp', 'Processado Em'
+                ];
+
+                headers.forEach((header, i) => {
+                    const cell = worksheet.getCell(rowIndex, i + 1);
+                    cell.value = header;
+                    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FF444444' },
+                    };
+                    cell.alignment = { horizontal: 'center' };
+                    cell.border = {
+                        top: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        left: { style: 'thin' },
+                        right: { style: 'thin' },
+                    };
+                });
+                rowIndex++;
+
+                // Dados da survey
+                carrinhoData.surveys.forEach(survey => {
+                    const data = survey;
+
+                    const rowData = [
+                        formatTimestamp(data.enviadoEm),
+                        data.surveyData?.usuario?.nome ?? '',
+                        data.surveyData?.usuario?.clube ?? '',
+                        data.surveyData?.tensao?.join(', ') ?? '',
+                        data.surveyData?.densidade?.join(', ') ?? '',
+                        data.surveyData?.comentario ?? '',
+                        data.pdfGerado === true ? 'Sim' : (data.pdfGerado === false ? 'Não' : ''),
+                        data.emailStatus ?? '',
+                        data.whatsStatus ?? '',
+                        formatTimestamp(data.processadoFimEm)
+                    ];
+
+                    rowData.forEach((value, i) => {
+                        const cell = worksheet.getCell(rowIndex, i + 1);
+                        cell.value = value;
+                        cell.border = {
+                            top: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            left: { style: 'thin' },
+                            right: { style: 'thin' },
+                        };
+                    });
+
+                    rowIndex++;
+                });
+
+                rowIndex++; // espaço entre carrinhos
+            });
+
+            rowIndex += 2; // espaço entre clientes
+        });
+
+        worksheet.columns.forEach(column => {
+            column.width = 20;
         });
 
         await workbook.xlsx.writeFile(excelPath);
@@ -129,6 +209,6 @@ const generateExcel = async () => {
         console.error("Erro ao gerar o Excel:", error);
         throw new Error("Erro ao gerar o Excel.");
     }
-}
+};
 
 generateExcel();
